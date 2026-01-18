@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skribbit — The Architecture of Growth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        obsidian: '#0A0A0A',
+                        slate: '#94A3B8',
+                        electric: '#39FF14',
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif'],
+                        'mono': ['JetBrains Mono', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #000000 0%, #0A0A0A 50%, #001a0d 100%);
+            animation: gradientShift 15s ease infinite;
+            background-size: 200% 200%;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .shape-blur {
+            filter: blur(100px);
+            opacity: 0.03;
+        }
+        
+        .hover-lift {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 30px rgba(57, 255, 20, 0.2);
+        }
+        
+        .cta-glow {
+            transition: all 0.2s ease;
+        }
+        
+        .cta-glow:hover {
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.6);
+        }
+        
+        /* Grain texture overlay */
+        .grain-overlay {
+            position: relative;
+        }
+        
+        .grain-overlay::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.5' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .grain-overlay > * {
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.95);
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: #0A0A0A;
+            padding: 0;
+            border: 1px solid #333;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .close-modal {
+            color: #94A3B8;
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10;
+            background: #000;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .close-modal:hover {
+            color: #39FF14;
+            background: #111;
+        }
+    </style>
+</head>
+<body class="bg-black text-slate overflow-x-hidden">
+    
+    <!-- Abstract Background Shapes -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-20 -left-40 w-96 h-96 bg-electric rounded-full shape-blur"></div>
+        <div class="absolute bottom-40 -right-40 w-80 h-80 bg-electric rounded-full shape-blur"></div>
+        <div class="absolute top-1/2 left-1/2 w-64 h-64 bg-electric rounded-full shape-blur"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center gradient-bg grain-overlay">
+        <div class="relative z-10 text-center px-6 max-w-5xl mx-auto">
+            <h1 class="text-6xl md:text-8xl font-extrabold text-white mb-6 tracking-tight">
+                The Architecture<br/>of Growth
+            </h1>
+            <p class="text-xl md:text-2xl font-mono text-slate max-w-3xl mx-auto mb-12 leading-relaxed">
+                Skribbit integrates high-level branding, AI-driven infrastructure,<br class="hidden md:block"/>
+                and go-to-market systems to scale modern enterprises.
+            </p>
+            <button onclick="openModal()" class="bg-electric text-black px-10 py-4 text-lg font-bold tracking-wide hover:bg-opacity-90 transition-all cta-glow">
+                [ INITIATE PROTOCOL ]
+            </button>
+        </div>
+    </section>
+
+    <!-- Philosophy Section -->
+    <section class="relative py-32 px-6 bg-obsidian grain-overlay">
+        <div class="max-w-6xl mx-auto">
+            <div class="border-t border-gray-800 mb-16"></div>
+            <h2 class="text-5xl md:text-6xl font-bold text-white mb-12">
+                Beyond Marketing.
+            </h2>
+            <p class="text-xl text-slate leading-relaxed max-w-4xl mb-16">
+                We don't just buy ads; we build revenue loops. We don't just design logos; we engineer identities. 
+                Skribbit exists at the intersection of creative intuition and algorithmic precision.
+            </p>
+            
+            <div class="grid md:grid-cols-3 gap-8 text-left">
+                <div>
+                    <h3 class="font-mono text-electric text-sm mb-3 tracking-wider">01 — ITERATIVE BRANDING</h3>
+                    <p class="text-slate leading-relaxed">Identity systems built for longevity.</p>
+                </div>
+                <div>
+                    <h3 class="font-mono text-electric text-sm mb-3 tracking-wider">02 — AUTONOMOUS OPS</h3>
+                    <p class="text-slate leading-relaxed">Leveraging AI to reclaim human bandwidth.</p>
+                </div>
+                <div>
+                    <h3 class="font-mono text-electric text-sm mb-3 tracking-wider">03 — REVENUE LOOPS</h3>
+                    <p class="text-slate leading-relaxed">GTM strategies that compound over time.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Competencies Section -->
+    <section class="relative py-32 px-6 bg-black grain-overlay">
+        <div class="max-w-6xl mx-auto">
+            <div class="border-t border-gray-800 mb-16"></div>
+            <h2 class="text-4xl md:text-5xl font-bold text-white mb-20 text-center">
+                Core Competencies
+            </h2>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Service 1 -->
+                <div class="bg-obsidian border border-gray-800 p-10 hover-lift">
+                    <h3 class="font-mono text-electric text-xs mb-6 tracking-widest uppercase">Domain Focus</h3>
+                    <h4 class="text-2xl font-bold text-white mb-4">Media & Identity</h4>
+                    <p class="text-slate leading-relaxed">
+                        Narrative positioning, brand architecture, and digital presence.
+                    </p>
+                </div>
+                
+                <!-- Service 2 -->
+                <div class="bg-obsidian border border-gray-800 p-10 hover-lift">
+                    <h3 class="font-mono text-electric text-xs mb-6 tracking-widest uppercase">Technical Stack</h3>
+                    <h4 class="text-2xl font-bold text-white mb-4">AI Integration</h4>
+                    <p class="text-slate leading-relaxed">
+                        AI integration, automated growth loops, and bespoke web builds.
+                    </p>
+                </div>
+                
+                <!-- Service 3 -->
+                <div class="bg-obsidian border border-gray-800 p-10 hover-lift">
+                    <h3 class="font-mono text-electric text-xs mb-6 tracking-widest uppercase">GTM Strategy</h3>
+                    <h4 class="text-2xl font-bold text-white mb-4">Market Entry</h4>
+                    <p class="text-slate leading-relaxed">
+                        Market entry, pricing psychology, and distribution scaling.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof Section -->
+    <section class="relative py-32 px-6 bg-obsidian grain-overlay">
+        <div class="max-w-6xl mx-auto text-center">
+            <div class="border-t border-gray-800 mb-16"></div>
+            <h2 class="text-4xl md:text-5xl font-bold text-white mb-8">
+                [ TRANSFORMATIONS IN PROGRESS ]
+            </h2>
+            <p class="text-xl text-slate max-w-2xl mx-auto font-mono">
+                Currently under NDA / Selected case studies available upon request.
+            </p>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="relative py-32 px-6 bg-black grain-overlay">
+        <div class="max-w-4xl mx-auto text-center">
+            <div class="border-t border-gray-800 mb-16"></div>
+            <h2 class="text-5xl md:text-6xl font-bold text-white mb-8 leading-tight">
+                The next phase of your<br/>evolution starts here.
+            </h2>
+            <p class="text-xl text-slate mb-12 leading-relaxed">
+                We work with a select cohort of partners ready to institutionalize their growth.
+            </p>
+            <button onclick="openModal()" class="bg-electric text-black px-12 py-5 text-lg font-bold tracking-wide hover:bg-opacity-90 transition-all cta-glow">
+                [ APPLY FOR ENGAGEMENT ]
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="relative py-16 px-6 bg-obsidian border-t border-gray-800">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-8 md:mb-0">
+                    <h3 class="text-2xl font-bold text-white mb-2">Skribbit</h3>
+                    <p class="text-sm text-slate font-mono">The Firm</p>
+                </div>
+                <div class="text-center md:text-right">
+                    <p class="text-slate mb-2">engage@skribbit.xyz</p>
+                    <p class="text-sm text-slate font-mono">
+                        Skribbit.xyz operates at the intersection of traditional strategy<br class="hidden md:block"/>
+                        and emerging infrastructure.
+                    </p>
+                </div>
+            </div>
+            <div class="mt-12 pt-8 border-t border-gray-800 text-center">
+                <p class="text-sm text-slate">&copy; 2026 Skribbit. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Tally Form Modal -->
+    <div id="formModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div class="p-8 pt-16">
+                <h3 class="text-3xl font-bold text-white mb-4 text-center">Apply for Engagement</h3>
+                <p class="text-slate text-center mb-8 font-mono">Complete the form below to initiate protocol.</p>
+                
+                <!-- TALLY EMBED PLACEHOLDER -->
+                <!-- Replace the src URL below with your actual Tally form URL -->
+                <!-- Example: https://tally.so/embed/YOUR-FORM-ID -->
+                <iframe 
+                    src="https://tally.so/embed/YOUR-FORM-ID?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1" 
+                    width="100%" 
+                    height="600" 
+                    frameborder="0" 
+                    marginheight="0" 
+                    marginwidth="0" 
+                    title="Skribbit Engagement Form"
+                    style="border: none;">
+                </iframe>
+                <!-- END TALLY EMBED -->
+                
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('formModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal() {
+            document.getElementById('formModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('formModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+        
+        // Close modal with ESC key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+
+</body>
+</html>
